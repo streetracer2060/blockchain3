@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>TestCoin</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
+
+	<link rel="stylesheet" href="assets/css/main_style.css">
+
+	<script src="assets/vendor/jquery/jquery-3.2.1.min.js"></script>
+	<script src="assets/vendor/bootstrap/js/popper.js"></script>
+	<script src="assets/vendor/bootstrap/js/bootstrap.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+</head>
+<body>
+
+	<div class="mywelcome-title"><h5>Simple Coin Generation [Coins Generated: <span id="coins_">0</span>]</h5></div>
+	<div class="mywelcome-title2">This is simple blockchain application written on NodeJs. <br/>Below are links for quick access to main features and source code: <br/>
+		<div style="padding-top: 10px;"><a href="/transactions" target="_blank">Transaction List</a> |
+		<a href="/blocks"  target="_blank">Block List</a> |
+		<a href="https://github.com/streetracer2060/blockchain3" target="_blank">Source Code</a>
+		</div>
+	</div>
+	<div class="contact1">
+		<div class="container-contact1">
+
+
+			<div>
+				<div class="contact1-form validate-form">
+					<span class="contact1-form-title">
+						Generate Coins
+					</span>
+
+					<div class="wrap-input1 validate-input" data-validate = "Amount is required">
+						<input class="input1" type="number" min="1" name="name" placeholder="Amount" id="amount_">
+						<span class="shadow-input1"></span>
+					</div>
+
+					<div class="wrap-input1 validate-input" data-validate = "Message is required" >
+						<input class="input1" type="text" name="email" placeholder="Message (optional)" id="value_">
+						<span class="shadow-input1"></span>
+					</div>
+
+
+					<div class="container-contact1-form-btn">
+						<button class="contact1-form-btn" id="new_block">
+							<span>
+								Generate
+								
+							</span>
+						</button>
+					</div>
+				</div>
+			</div>
+			<div>
+				<div class="contact1-form validate-form">
+					<span class="contact1-form-title">
+						Blockhain Data
+					</span>
+
+					<div class="wrap-input1 validate-input" data-validate = "Blockchain Data is required">
+						<textarea class="input1" name="message" placeholder="Blockchain Data" id="data_"></textarea>
+						<span class="shadow-input1"></span>
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+	<script>
+		var socket__io;
+		function isEmpty_(str) {
+			return (!str || 0 === str.length);
+		}
+
+		$(function () {
+			// alert('');
+			socket__io = io.connect('https://simpleblockchain.ml:3000',{secure: true});
+
+	        $('#new_block').click(function(){
+	        	var amount = document.getElementById("amount_").value;
+	        	var value_ = document.getElementById("value_").value;
+	            var block_data_ = {
+	              amount: amount,
+	              message: value_
+	            };
+
+	            var num = parseInt(amount) || 0;
+	            if (num <= 0 ) {
+	            	alert('amount has to be integer higher than zero');
+	            }
+	            else if (isEmpty_(amount) /*|| isEmpty_(value_)*/) {
+	            	alert('field is empty ');
+	            }
+	            else {
+	            	socket__io.emit('new_block_message', block_data_);
+	            }
+	            
+	            return false;
+	        });
+
+
+	        socket__io.on('on_manual_update', function(isSuccess){
+	        	console.log("blockchain database was modified by user: " + isSuccess);
+	        });
+	        socket__io.on('raw_blockchain_data', function(blockchainData){
+	        	// console.log(blockchainData);
+	        	console.log("raw blockhain data was sent");
+	        	document.getElementById("data_").value = blockchainData;
+	        });
+	        socket__io.on('total_coins', function(total){
+
+	        	console.log("total coins: " + total);
+	        	document.getElementById("coins_").textContent = total;
+	        });
+
+		});
+
+		function isJsonStringValid(str) {
+		    try {
+		        JSON.parse(str);
+		    } catch (e) {
+		        return false;
+		    }
+		    return true;
+		};
+	</script> 
+
+
+
+</body>
+</html>
